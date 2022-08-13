@@ -127,9 +127,14 @@ func getColumn(fSlice []string, sep string, k int) (StringMap map[string][]strin
 			unsorted = append(unsorted, str)
 			continue
 		}
+		_, ok := StringMap[a[k]]
+		if !ok {
+			keys = append(keys, a[k])
+		}
 		StringMap[a[k]] = append(StringMap[a[k]], str)
-		keys = append(keys, a[k])
+
 	}
+	fmt.Println(StringMap)
 	return
 }
 
@@ -150,9 +155,22 @@ func Unique(input []string) []string {
 	return uniq
 }
 
-func sortColumn(fSlice []string) []string {
-	StringMap, keys, unsorted := getColumn(fSlice, " ", 1)
-	StringMap:= 
+func sortColumn(fSlice []string, k int) []string {
+	StringMap, keys, unsorted := getColumn(fSlice, " ", k)
+	l := alphabetSort(unsorted)
+	var result []string
+	sort.Slice(unsorted, l)
+	result = append(result, unsorted...)
+	fmt.Println(result)
+	l = alphabetSort(keys)
+	fmt.Println(keys)
+	sort.Slice(keys, l)
+	for _, key := range keys {
+		l = alphabetSort(StringMap[key])
+		sort.Slice(StringMap[key], l)
+		result = append(result, StringMap[key]...)
+	}
+	return result
 }
 func sortSort(fSlice []string) []string {
 
@@ -161,7 +179,7 @@ func sortSort(fSlice []string) []string {
 	//l := numSort(fSlice)
 	//l = reverse(l, true)
 	//l := sortColumnK(fSlice, 1, " ")
-	sort.Slice(fSlice, l)
+	//sort.Slice(fSlice, l)
 	return fSlice
 }
 
@@ -172,7 +190,8 @@ func main() {
 		log.Fatalf("Error while reading file: %s", err)
 	}
 
-	fSlice = sortSort(fSlice)
+	//fSlice = sortSort(fSlice)
+	fSlice = sortColumn(fSlice, 8)
 
 	err = writeFile(fName, fSlice)
 
