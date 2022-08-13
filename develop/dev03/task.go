@@ -35,6 +35,8 @@ import (
 Программа должна проходить все тесты. Код должен проходить проверки go vet и golint.
 */
 
+type sliceSort func(fSlice []string) func(i int, j int) bool
+
 func readFile(fileName string) ([]string, error) {
 	var sc *bufio.Scanner
 	if len(fileName) == 0 {
@@ -76,6 +78,10 @@ func writeFile(fileName string, fSlice []string) error {
 	return nil
 }
 
+//Строки с цифрами размещаются выше других строк
+//Строки, начинающиеся с букв нижнего регистра размещаются выше
+//Сортировка выполняется в соответствии c алфавитом
+//Строки сначала сортируются по алфавиту, а уже вторично по другим правилам.
 func order(i, j string) bool {
 	a := strings.ToLower(i)
 	b := strings.ToLower(j)
@@ -155,31 +161,32 @@ func Unique(input []string) []string {
 	return uniq
 }
 
-func sortColumn(fSlice []string, k int) []string {
+func sortColumn(fSlice []string, k int, mainSort, subSort sliceSort) []string {
 	StringMap, keys, unsorted := getColumn(fSlice, " ", k)
-	l := alphabetSort(unsorted)
+	l := subSort(unsorted)
 	var result []string
 	sort.Slice(unsorted, l)
 	result = append(result, unsorted...)
 	fmt.Println(result)
-	l = alphabetSort(keys)
+	l = mainSort(keys)
 	fmt.Println(keys)
 	sort.Slice(keys, l)
 	for _, key := range keys {
-		l = alphabetSort(StringMap[key])
+		l = subSort(StringMap[key])
 		sort.Slice(StringMap[key], l)
 		result = append(result, StringMap[key]...)
 	}
 	return result
 }
 func sortSort(fSlice []string) []string {
-
+	subSort := alphabetSort
+	mainSort := numSort
 	//fSlice = Unique(fSlice)
 	//l := alphabetSort(fSlice)
 	//l := numSort(fSlice)
 	//l = reverse(l, true)
-	//l := sortColumnK(fSlice, 1, " ")
 	//sort.Slice(fSlice, l)
+	fSlice = sortColumn(fSlice, 6, mainSort, subSort)
 	return fSlice
 }
 
@@ -190,8 +197,7 @@ func main() {
 		log.Fatalf("Error while reading file: %s", err)
 	}
 
-	//fSlice = sortSort(fSlice)
-	fSlice = sortColumn(fSlice, 8)
+	fSlice = sortSort(fSlice)
 
 	err = writeFile(fName, fSlice)
 
