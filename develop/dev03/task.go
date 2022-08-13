@@ -35,7 +35,7 @@ import (
 Программа должна проходить все тесты. Код должен проходить проверки go vet и golint.
 */
 
-type sliceSort func(fSlice []string) func(i int, j int) bool
+type sliceSort func(fSlice []string, order func(i, j string) bool) func(i int, j int) bool
 
 func readFile(fileName string) ([]string, error) {
 	var sc *bufio.Scanner
@@ -82,7 +82,7 @@ func writeFile(fileName string, fSlice []string) error {
 //Строки, начинающиеся с букв нижнего регистра размещаются выше
 //Сортировка выполняется в соответствии c алфавитом
 //Строки сначала сортируются по алфавиту, а уже вторично по другим правилам.
-func order(i, j string) bool {
+func defaultOrder(i, j string) bool {
 	a := strings.ToLower(i)
 	b := strings.ToLower(j)
 	if a == b {
@@ -91,13 +91,17 @@ func order(i, j string) bool {
 	return a < b
 }
 
-func alphabetSort(fSlice []string) func(i, j int) bool {
+func reverseOrder(i, j string) bool {
+	return !defaultOrder(i, j)
+}
+
+func alphabetSort(fSlice []string, order func(i, j string) bool) func(i, j int) bool {
 	return func(i, j int) (result bool) {
 		return order(fSlice[i], fSlice[j])
 	}
 }
 
-func numSort(fSlice []string) func(i, j int) bool {
+func numSort(fSlice []string, order func(i, j string) bool) func(i, j int) bool {
 	return func(i, j int) (result bool) {
 		a, err1 := strconv.Atoi(fSlice[i])
 		b, err2 := strconv.Atoi(fSlice[j])
@@ -114,18 +118,7 @@ func numSort(fSlice []string) func(i, j int) bool {
 	}
 }
 
-func reverse(sort func(i, j int) bool, rev bool) func(i, j int) bool {
-	return func(i, j int) (result bool) {
-		if rev {
-			defer func() {
-				result = !result
-			}()
-		}
-		return sort(i, j)
-	}
-}
-
-func getColumn(fSlice []string, sep string, k int) (StringMap map[string][]string, keys []string, unsorted []string) {
+func getColumnMap(fSlice []string, sep string, k int) (StringMap map[string][]string, keys []string, unsorted []string) {
 	StringMap = make(map[string][]string)
 	for _, str := range fSlice {
 		a := strings.Split(str, sep)
@@ -138,9 +131,7 @@ func getColumn(fSlice []string, sep string, k int) (StringMap map[string][]strin
 			keys = append(keys, a[k])
 		}
 		StringMap[a[k]] = append(StringMap[a[k]], str)
-
 	}
-	fmt.Println(StringMap)
 	return
 }
 
@@ -161,32 +152,45 @@ func Unique(input []string) []string {
 	return uniq
 }
 
-func sortColumn(fSlice []string, k int, mainSort, subSort sliceSort) []string {
-	StringMap, keys, unsorted := getColumn(fSlice, " ", k)
-	l := subSort(unsorted)
+func sortByColumn(fSlice []string, k int, mainSort, subSort sliceSort, order func(i, j string) bool) []string {
+	StringMap, keys, unsorted := getColumnMap(fSlice, " ", k)
+	less := subSort(unsorted, order)
 	var result []string
-	sort.Slice(unsorted, l)
+	sort.Slice(unsorted, less)
 	result = append(result, unsorted...)
-	fmt.Println(result)
-	l = mainSort(keys)
-	fmt.Println(keys)
-	sort.Slice(keys, l)
+	less = mainSort(keys, order)
+	sort.Slice(keys, less)
 	for _, key := range keys {
-		l = subSort(StringMap[key])
-		sort.Slice(StringMap[key], l)
+		less = subSort(StringMap[key], order)
+		sort.Slice(StringMap[key], less)
 		result = append(result, StringMap[key]...)
 	}
 	return result
 }
-func sortSort(fSlice []string) []string {
+
+func sortSort(fSlice []string, k int, unique, numeric, reverse bool) []string {
 	subSort := alphabetSort
-	mainSort := numSort
-	//fSlice = Unique(fSlice)
-	//l := alphabetSort(fSlice)
-	//l := numSort(fSlice)
-	//l = reverse(l, true)
-	//sort.Slice(fSlice, l)
-	fSlice = sortColumn(fSlice, 6, mainSort, subSort)
+
+	order := defaultOrder
+	if reverse {
+		order = reverseOrder
+	}
+
+	mainSort := alphabetSort
+	if numeric {
+		mainSort = numSort
+	}
+
+	if unique {
+		fSlice = Unique(fSlice)
+	}
+
+	if k >= 0 {
+		return sortByColumn(fSlice, k, mainSort, subSort, order)
+	}
+
+	less := mainSort(fSlice, order)
+	sort.Slice(fSlice, less)
 	return fSlice
 }
 
@@ -197,7 +201,12 @@ func main() {
 		log.Fatalf("Error while reading file: %s", err)
 	}
 
-	fSlice = sortSort(fSlice)
+	k := 6
+	uniq := true
+	numeric := true
+	reverse := false
+
+	fSlice = sortSort(fSlice, k, uniq, numeric, reverse)
 
 	err = writeFile(fName, fSlice)
 
