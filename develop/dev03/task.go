@@ -35,7 +35,7 @@ import (
 Программа должна проходить все тесты. Код должен проходить проверки go vet и golint.
 */
 
-type sliceSort func(fSlice []string, order func(i, j string) bool) func(i int, j int) bool
+type sliceSort func(fSlice []string, rev bool) func(i int, j int) bool
 
 func readFile(fileName string) ([]string, error) {
 	var sc *bufio.Scanner
@@ -82,7 +82,7 @@ func writeFile(fileName string, fSlice []string) error {
 //Строки, начинающиеся с букв нижнего регистра размещаются выше
 //Сортировка выполняется в соответствии c алфавитом
 //Строки сначала сортируются по алфавиту, а уже вторично по другим правилам.
-func defaultOrder(i, j string) bool {
+func order(i, j string) bool {
 	a := strings.ToLower(i)
 	b := strings.ToLower(j)
 	if a == b {
@@ -91,18 +91,24 @@ func defaultOrder(i, j string) bool {
 	return a < b
 }
 
-func reverseOrder(i, j string) bool {
-	return !defaultOrder(i, j)
+func xor(a, b bool) bool {
+	return (a && !b) || (!a && b)
 }
 
-func alphabetSort(fSlice []string, order func(i, j string) bool) func(i, j int) bool {
-	return func(i, j int) (result bool) {
+func alphabetSort(fSlice []string, rev bool) func(i, j int) bool {
+	return func(i, j int) (res bool) {
+		defer func() {
+			res = xor(res, rev)
+		}()
 		return order(fSlice[i], fSlice[j])
 	}
 }
 
-func numSort(fSlice []string, order func(i, j string) bool) func(i, j int) bool {
-	return func(i, j int) (result bool) {
+func numSort(fSlice []string, rev bool) func(i, j int) bool {
+	return func(i, j int) (res bool) {
+		defer func() {
+			res = xor(res, rev)
+		}()
 		a, err1 := strconv.Atoi(fSlice[i])
 		b, err2 := strconv.Atoi(fSlice[j])
 		if err1 != nil && err2 != nil {
@@ -152,30 +158,24 @@ func Unique(input []string) []string {
 	return uniq
 }
 
-func sortByColumn(fSlice []string, k int, mainSort, subSort sliceSort, order func(i, j string) bool) []string {
+func sortByColumn(fSlice []string, k int, mainSort, subSort sliceSort, reversal bool) []string {
 	StringMap, keys, unsorted := getColumnMap(fSlice, " ", k)
-	less := subSort(unsorted, order)
+	less := subSort(unsorted, reversal)
 	var result []string
 	sort.Slice(unsorted, less)
 	result = append(result, unsorted...)
-	less = mainSort(keys, order)
+	less = mainSort(keys, reversal)
 	sort.Slice(keys, less)
 	for _, key := range keys {
-		less = subSort(StringMap[key], order)
+		less = subSort(StringMap[key], reversal)
 		sort.Slice(StringMap[key], less)
 		result = append(result, StringMap[key]...)
 	}
 	return result
 }
 
-func sortSort(fSlice []string, k int, unique, numeric, reverse bool) []string {
+func sortSort(fSlice []string, k int, unique, numeric, reversal bool) []string {
 	subSort := alphabetSort
-
-	order := defaultOrder
-	if reverse {
-		order = reverseOrder
-	}
-
 	mainSort := alphabetSort
 	if numeric {
 		mainSort = numSort
@@ -186,10 +186,10 @@ func sortSort(fSlice []string, k int, unique, numeric, reverse bool) []string {
 	}
 
 	if k >= 0 {
-		return sortByColumn(fSlice, k, mainSort, subSort, order)
+		return sortByColumn(fSlice, k, mainSort, subSort, reversal)
 	}
 
-	less := mainSort(fSlice, order)
+	less := mainSort(fSlice, reversal)
 	sort.Slice(fSlice, less)
 	return fSlice
 }
@@ -203,7 +203,7 @@ func main() {
 
 	k := 6
 	uniq := true
-	numeric := true
+	numeric := false
 	reverse := false
 
 	fSlice = sortSort(fSlice, k, uniq, numeric, reverse)
