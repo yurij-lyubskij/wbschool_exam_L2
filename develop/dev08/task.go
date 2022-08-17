@@ -154,7 +154,7 @@ func runCommand(args []string, w io.Writer, r io.Reader) error {
 
 //наша shell-утилита
 //на входе - файлы для чтения и записи
-func shell(f1 *os.File, f2 *os.File) {
+func shell(f1 io.Reader, f2 io.Writer) {
 	//буфер-writer
 	var buf bytes.Buffer
 	//создаем сканер для чтения из файла
@@ -180,7 +180,7 @@ func shell(f1 *os.File, f2 *os.File) {
 			}
 		}
 		//выводим результат последней команды в пайпе
-		fmt.Fprintln(f2, buf.String())
+		fmt.Fprintf(f2, buf.String())
 		buf.Reset()
 	}
 }
