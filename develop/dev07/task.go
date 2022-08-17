@@ -117,6 +117,7 @@ func orParallel(channels ...<-chan interface{}) <-chan interface{} {
 		wg.Wait()
 		//закрываем канал
 		close(orchan)
+		cancel()
 	}()
 
 	return orchan
