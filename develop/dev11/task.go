@@ -55,7 +55,7 @@ func main() {
 		Description: "dadfadsf",
 	}
 	fmt.Println(event)
-	bytes, err := json.Marshal(event)
+	bytes, err := json.Marshal(&event)
 	fmt.Println(string(bytes))
 	if err != nil {
 		fmt.Println(err)
