@@ -1,5 +1,12 @@
 package main
 
+import (
+	"encoding/json"
+	"fmt"
+	"net/http"
+	"time"
+)
+
 /*
 === HTTP server ===
 
@@ -23,5 +30,40 @@ package main
 */
 
 func main() {
+
+	http.HandleFunc("/create_event", createHandler)
+	http.HandleFunc("/update_event", updateHandler)
+	http.HandleFunc("/delete_event", deleteHandler)
+	http.HandleFunc("/events_for_day", dayEventsHandler)
+	http.HandleFunc("/events_for_week", weekEventsHandler)
+	http.HandleFunc("/events_for_month", monthEventsHandler)
+
+	fmt.Println("starting server at :8080")
+	//const shortForm = "2006-Jan-02"
+	//t, _ := time.Parse(shortForm, "2013-Feb-03")
+	const dateForm = "2006-01-02"
+	t, err := time.Parse(dateForm, "2019-09-10")
+	//d := time.Date(2000, 2, 1, 12, 30, 0, 0, time.UTC)
+	year, month, day := t.Date()
+	fmt.Println(year, month, day)
+	if err != nil {
+		fmt.Println(err)
+	}
+	event := Event{
+		UserID:      "123",
+		Date:        t,
+		Description: "dadfadsf",
+	}
+	fmt.Println(event)
+	bytes, err := json.Marshal(event)
+	if err != nil {
+		fmt.Println(err)
+	}
+	err = json.Unmarshal(bytes, event)
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println(event)
+	//http.ListenAndServe(":8080", nil)
 
 }
