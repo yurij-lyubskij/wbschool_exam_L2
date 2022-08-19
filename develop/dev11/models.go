@@ -1,6 +1,7 @@
 package main
 
 import (
+	"strconv"
 	"strings"
 	"time"
 )
@@ -12,14 +13,17 @@ type Event struct {
 }
 
 func (m *Event) MarshalJSON() ([]byte, error) {
-	//{"UserID":"123","Date":"2019-09-10T00:00:00Z","Description":"dadfadsf"}
+	//{"UserID":"123","Date":"2006-01-02","Description":"dadfadsf"}
 	str := strings.Builder{}
 	str.WriteString(`{"user_id":"`)
 	str.WriteString(m.UserID)
 	str.WriteString(`","date":"`)
-	//date := m.Date.String()
-	date := "123456"
-	str.WriteString(date)
+	year, month, day := m.Date.Date()
+	str.WriteString(strconv.Itoa(year))
+	str.WriteRune('-')
+	str.WriteString(strconv.Itoa(int(month)))
+	str.WriteRune('-')
+	str.WriteString(strconv.Itoa(day))
 	str.WriteString(`","description":"`)
 	str.WriteString(m.Description)
 	str.WriteString(`"}`)
