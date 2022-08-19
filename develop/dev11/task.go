@@ -56,10 +56,11 @@ func main() {
 	}
 	fmt.Println(event)
 	bytes, err := json.Marshal(event)
+	fmt.Println(string(bytes))
 	if err != nil {
 		fmt.Println(err)
 	}
-	err = json.Unmarshal(bytes, event)
+	err = json.Unmarshal(bytes, &event)
 	if err != nil {
 		fmt.Println(err)
 	}
