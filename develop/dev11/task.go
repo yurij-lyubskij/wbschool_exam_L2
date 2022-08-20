@@ -66,5 +66,28 @@ func main() {
 	fmt.Println(newevent)
 	fmt.Println(time.Now())
 	//http.ListenAndServe(":8080", nil)
-
+	storage := NewStorage()
+	_, err = storage.createEvent(event)
+	if err != nil {
+		fmt.Println(err)
+	}
+	event.Description = "new1"
+	_, err = storage.createEvent(event)
+	if err != nil {
+		fmt.Println(err)
+	}
+	event.Description = "new2"
+	_, err = storage.createEvent(event)
+	if err != nil {
+		fmt.Println(err)
+	}
+	event.Description = "new3"
+	_, err = storage.createEvent(event)
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println(*storage)
+	event.Num = 2
+	err = storage.deleteEvent(event)
+	fmt.Println(*storage)
 }
