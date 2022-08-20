@@ -87,7 +87,6 @@ func main() {
 		fmt.Println(err)
 	}
 	fmt.Println(*storage)
-	event.Num = 2
-	err = storage.deleteEvent(event)
-	fmt.Println(*storage)
+	events := storage.getEventsByDay(event.UserID, event.Date)
+	fmt.Println(events)
 }

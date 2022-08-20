@@ -1,6 +1,9 @@
 package main
 
-import "errors"
+import (
+	"errors"
+	"time"
+)
 
 //В чистой архитектуре принято разделение на
 //delivery, usecase и repository
@@ -93,4 +96,33 @@ func (m *Storage) deleteEvent(event Event) error {
 	arr = append(arr[:event.Num-1], arr[event.Num:]...)
 	m.Events[id][year][int(month)][day] = arr
 	return nil
+}
+
+func (m *Storage) getEventsByDay(id string, date time.Time) []Event {
+	year, month, day := date.Date()
+	var result []Event
+	if m.Events[id] == nil {
+		return result
+	}
+	if m.Events[id][year] == nil {
+		return result
+	}
+	if m.Events[id][year][int(month)] == nil {
+		return result
+	}
+	arr := m.Events[id][year][int(month)][day]
+	event := Event{
+		UserID:      id,
+		Date:        date,
+		Num:         0,
+		Description: "",
+	}
+
+	for i, description := range arr {
+		event.Num = i + 1
+		event.Description = description
+		result = append(result, event)
+	}
+
+	return result
 }
