@@ -39,9 +39,6 @@ func main() {
 	http.HandleFunc("/events_for_month", monthEventsHandler)
 
 	fmt.Println("starting server at :8080")
-	//const shortForm = "2006-Jan-02"
-	//t, _ := time.Parse(shortForm, "2013-Feb-03")
-	const dateForm = "2006-01-02"
 	t, err := time.Parse(dateForm, "2019-09-10")
 	//d := time.Date(2000, 2, 1, 12, 30, 0, 0, time.UTC)
 	year, month, day := t.Date()
@@ -60,11 +57,12 @@ func main() {
 	if err != nil {
 		fmt.Println(err)
 	}
-	err = json.Unmarshal(bytes, &event)
+	var newevent Event
+	err = json.Unmarshal(bytes, &newevent)
 	if err != nil {
 		fmt.Println(err)
 	}
-	fmt.Println(event)
+	fmt.Println(newevent)
 	//http.ListenAndServe(":8080", nil)
 
 }
