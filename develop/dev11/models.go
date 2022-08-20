@@ -2,7 +2,6 @@ package main
 
 import (
 	"errors"
-	"fmt"
 	"strconv"
 	"strings"
 	"time"
@@ -10,14 +9,18 @@ import (
 
 const dateForm = "2006-01-02"
 
+//Event - событие в календаре
+//Num - не уникальный айдишник, а порядковый номер события
+//на определенную дату
 type Event struct {
 	UserID      string    `json:"user_id"`
 	Date        time.Time `json:"date"`
+	Num         int       `json:"event_num"`
 	Description string    `json:"description"`
 }
 
 func (m *Event) MarshalJSON() ([]byte, error) {
-	//{"user_id":"123","date":"2019-09-10","description":"dadfadsf"}
+	//{"user_id":"123","date":"2019-09-10", "event_num":"1", "description":"dadfadsf"}
 	str := strings.Builder{}
 	str.WriteString(`{"user_id":"`)
 	str.WriteString(m.UserID)
@@ -34,6 +37,8 @@ func (m *Event) MarshalJSON() ([]byte, error) {
 		str.WriteRune('0')
 	}
 	str.WriteString(strconv.Itoa(day))
+	str.WriteString(`","event_num":"`)
+	str.WriteString(strconv.Itoa(m.Num))
 	str.WriteString(`","description":"`)
 	str.WriteString(m.Description)
 	str.WriteString(`"}`)
@@ -41,16 +46,13 @@ func (m *Event) MarshalJSON() ([]byte, error) {
 }
 
 func (m *Event) UnmarshalJSON(json []byte) error {
-	//{"user_id":"123","date":"2019-09-10","description":"dadfadsf"}
+	//{"user_id":"123","date":"2019-09-10","event_num":"1","description":"dadfadsf"}
 	strJSON := string(json)
 	trimmed := strings.Trim(strJSON, "{}\"")
-	fmt.Println(trimmed)
 	splitJSON := strings.Split(trimmed, "\",\"")
-	fmt.Println(splitJSON)
 	keyVal := make([][]string, len(splitJSON))
 	for i, substr := range splitJSON {
 		keyVal[i] = strings.Split(substr, "\":\"")
-		fmt.Println(keyVal[i])
 	}
 
 	if strings.Contains(keyVal[0][0], "user_id") {
@@ -69,8 +71,18 @@ func (m *Event) UnmarshalJSON(json []byte) error {
 		return errors.New("error in date")
 	}
 
-	if strings.Contains(keyVal[2][0], "description") {
-		m.Description = keyVal[2][1]
+	if strings.Contains(keyVal[2][0], "event_num") {
+		var err error
+		m.Num, err = strconv.Atoi(keyVal[2][1])
+		if err != nil {
+			return err
+		}
+	} else {
+		return errors.New("error in event_num")
+	}
+
+	if strings.Contains(keyVal[3][0], "description") {
+		m.Description = keyVal[3][1]
 	} else {
 		return errors.New("error in description")
 	}

@@ -49,6 +49,7 @@ func main() {
 	event := Event{
 		UserID:      "123",
 		Date:        t,
+		Num:         100,
 		Description: "dadfadsf",
 	}
 	fmt.Println(event)
@@ -63,6 +64,7 @@ func main() {
 		fmt.Println(err)
 	}
 	fmt.Println(newevent)
+	fmt.Println(time.Now())
 	//http.ListenAndServe(":8080", nil)
 
 }
