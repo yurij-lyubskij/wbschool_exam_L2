@@ -87,6 +87,6 @@ func main() {
 		fmt.Println(err)
 	}
 	fmt.Println(*storage)
-	events := storage.getEventsByDay(event.UserID, event.Date)
+	events := storage.getEventsByWeek(event.UserID, event.Date)
 	fmt.Println(events)
 }

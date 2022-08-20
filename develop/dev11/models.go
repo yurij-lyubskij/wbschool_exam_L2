@@ -19,6 +19,21 @@ type Event struct {
 	Description string    `json:"description"`
 }
 
+func dateBuilder(str *strings.Builder, year, month, day int) {
+
+	str.WriteString(strconv.Itoa(year))
+	str.WriteRune('-')
+	if month < 10 {
+		str.WriteRune('0')
+	}
+	str.WriteString(strconv.Itoa(month))
+	str.WriteRune('-')
+	if day < 10 {
+		str.WriteRune('0')
+	}
+	str.WriteString(strconv.Itoa(day))
+}
+
 func (m *Event) MarshalJSON() ([]byte, error) {
 	//{"user_id":"123","date":"2019-09-10", "event_num":"1", "description":"dadfadsf"}
 	str := strings.Builder{}
@@ -26,17 +41,7 @@ func (m *Event) MarshalJSON() ([]byte, error) {
 	str.WriteString(m.UserID)
 	str.WriteString(`" ,"date":"`)
 	year, month, day := m.Date.Date()
-	str.WriteString(strconv.Itoa(year))
-	str.WriteRune('-')
-	if month < 10 {
-		str.WriteRune('0')
-	}
-	str.WriteString(strconv.Itoa(int(month)))
-	str.WriteRune('-')
-	if day < 10 {
-		str.WriteRune('0')
-	}
-	str.WriteString(strconv.Itoa(day))
+	dateBuilder(&str, year, int(month), day)
 	str.WriteString(`","event_num":"`)
 	str.WriteString(strconv.Itoa(m.Num))
 	str.WriteString(`","description":"`)

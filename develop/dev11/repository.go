@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+	"strings"
 	"time"
 )
 
@@ -124,5 +125,65 @@ func (m *Storage) getEventsByDay(id string, date time.Time) []Event {
 		result = append(result, event)
 	}
 
+	return result
+}
+
+func (m *Storage) getEventsByMonth(id string, date time.Time) []Event {
+	year, month, _ := date.Date()
+	var result []Event
+	if m.Events[id] == nil {
+		return result
+	}
+	if m.Events[id][year] == nil {
+		return result
+	}
+	monthInMap := m.Events[id][year][int(month)]
+	event := Event{
+		UserID:      id,
+		Date:        date,
+		Num:         0,
+		Description: "",
+	}
+	for _, arr := range monthInMap {
+		for i, description := range arr {
+			event.Num = i + 1
+			event.Description = description
+			result = append(result, event)
+		}
+	}
+	return result
+}
+
+func (m *Storage) getEventsByWeek(id string, date time.Time) []Event {
+	year, month, _ := date.Date()
+	_, w1 := date.ISOWeek()
+	var result []Event
+	if m.Events[id] == nil {
+		return result
+	}
+	if m.Events[id][year] == nil {
+		return result
+	}
+	monthInMap := m.Events[id][year][int(month)]
+	event := Event{
+		UserID:      id,
+		Date:        date,
+		Num:         0,
+		Description: "",
+	}
+	str := strings.Builder{}
+	for day, arr := range monthInMap {
+		dateBuilder(&str, year, int(month), day)
+		t, _ := time.Parse(dateForm, str.String())
+		str.Reset()
+		_, w2 := t.ISOWeek()
+		if w1 == w2 {
+			for i, description := range arr {
+				event.Num = i + 1
+				event.Description = description
+				result = append(result, event)
+			}
+		}
+	}
 	return result
 }
