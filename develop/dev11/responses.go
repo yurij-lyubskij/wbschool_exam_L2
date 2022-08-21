@@ -91,7 +91,7 @@ func (e *ErrorResponse) MarshalJSON() ([]byte, error) {
 	return []byte(str.String()), nil
 }
 
-func (r *ResultResponse) MarshalJSON() ([]byte, error) {
+func (r ResultResponse) MarshalJSON() ([]byte, error) {
 	var result strings.Builder
 	result.WriteString(`{"result":"`)
 	body, err := r.Result.MarshalJSON()
@@ -103,7 +103,7 @@ func (r *ResultResponse) MarshalJSON() ([]byte, error) {
 	return []byte(result.String()), nil
 }
 
-func (g *GetResult) MarshalJSON() ([]byte, error) {
+func (g GetResult) MarshalJSON() ([]byte, error) {
 	var result strings.Builder
 	result.WriteString(`{"events":[`)
 	for _, event := range g.Events {
@@ -118,7 +118,7 @@ func (g *GetResult) MarshalJSON() ([]byte, error) {
 	return []byte(result.String()), nil
 }
 
-func (c *CRUDResult) MarshalJSON() ([]byte, error) {
+func (c CRUDResult) MarshalJSON() ([]byte, error) {
 	var result strings.Builder
 	result.WriteString(`{"event_num":`)
 	result.WriteString(strconv.Itoa(c.Num))
