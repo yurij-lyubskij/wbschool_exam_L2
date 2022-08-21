@@ -47,46 +47,23 @@ func ReadConfig() error {
 }
 
 func main() {
-	http.HandleFunc("/create_event", createHandler)
-	http.HandleFunc("/update_event", updateHandler)
-	http.HandleFunc("/delete_event", deleteHandler)
-	http.HandleFunc("/events_for_day", dayEventsHandler)
-	http.HandleFunc("/events_for_week", weekEventsHandler)
-	http.HandleFunc("/events_for_month", monthEventsHandler)
+	mux := http.NewServeMux()
+	mux.HandleFunc("/create_event", createHandler)
+	mux.HandleFunc("/update_event", updateHandler)
+	mux.HandleFunc("/delete_event", deleteHandler)
+	mux.HandleFunc("/events_for_day", dayEventsHandler)
+	mux.HandleFunc("/events_for_week", weekEventsHandler)
+	mux.HandleFunc("/events_for_month", monthEventsHandler)
 
-	//fmt.Println("starting server at :8080")
-	//t, err := time.Parse(dateForm, "2019-09-10")
-	////d := time.Date(2000, 2, 1, 12, 30, 0, 0, time.UTC)
-	//year, month, day := t.Date()
-	//fmt.Println(year, month, day)
-	//if err != nil {
-	//	fmt.Println(err)
-	//}
-	//event := Event{
-	//	UserID:      "123",
-	//	Date:        t,
-	//	Num:         100,
-	//	Description: "dadfadsf",
-	//}
-	//fmt.Println(event)
-	//bytes, err := json.Marshal(&event)
-	//fmt.Println(string(bytes))
-	//if err != nil {
-	//	fmt.Println(err)
-	//}
-	//var newevent Event
-	//err = json.Unmarshal(bytes, &newevent)
-	//if err != nil {
-	//	fmt.Println(err)
-	//}
-	//fmt.Println(newevent)
-	//fmt.Println(time.Now())
+	// set middleware
+	siteHandler := logMiddleware(mux)
 	err := ReadConfig()
 	if err != nil {
 		log.Fatal(err.Error())
 	}
+	
 	address := viper.GetString("port")
 	fmt.Println("launching server at port", address)
-	http.ListenAndServe(address, nil)
+	http.ListenAndServe(address, siteHandler)
 
 }
