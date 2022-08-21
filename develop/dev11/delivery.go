@@ -1,11 +1,17 @@
 package main
 
-import "net/http"
+import (
+	"net/http"
+	"time"
+)
 
 const inputError = 400
+const businessError = 503
 const serverError = 500
 
-func errWrite(w http.ResponseWriter, err error) {
+type GetEvents func(id string, date time.Time) []Event
+
+func errWrite(w http.ResponseWriter, err error, code int) {
 	var bytes []byte
 	var errResp ErrorResponse
 	errResp.ErrorMsg = err.Error()
@@ -14,7 +20,7 @@ func errWrite(w http.ResponseWriter, err error) {
 		w.WriteHeader(serverError)
 		return
 	}
-	w.WriteHeader(inputError)
+	w.WriteHeader(code)
 	w.Write(bytes)
 }
 
@@ -33,12 +39,12 @@ func createHandler(w http.ResponseWriter, r *http.Request) {
 	var resResp ResultResponse
 	w.Header().Set("Content-Type", "application/x-www-form-urlencoded")
 	if err != nil {
-		errWrite(w, err)
+		errWrite(w, err, inputError)
 		return
 	}
 	num, err := storage.createEvent(event)
 	if err != nil {
-		errWrite(w, err)
+		errWrite(w, err, businessError)
 		return
 	}
 	resResp.Result = CRUDResult{Num: num, Success: true}
@@ -46,21 +52,60 @@ func createHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func updateHandler(w http.ResponseWriter, r *http.Request) {
-
+	var resResp ResultResponse
+	w.Header().Set("Content-Type", "application/x-www-form-urlencoded")
+	event, err := parsePost(r, true, true)
+	if err != nil {
+		errWrite(w, err, inputError)
+		return
+	}
+	err = storage.updateEvent(event)
+	if err != nil {
+		errWrite(w, err, businessError)
+		return
+	}
+	resResp.Result = CRUDResult{Num: event.Num, Success: true}
+	resWrite(w, resResp)
 }
 
 func deleteHandler(w http.ResponseWriter, r *http.Request) {
+	var resResp ResultResponse
+	w.Header().Set("Content-Type", "application/x-www-form-urlencoded")
+	event, err := parsePost(r, true, false)
+	if err != nil {
+		errWrite(w, err, inputError)
+		return
+	}
+	err = storage.deleteEvent(event)
+	if err != nil {
+		errWrite(w, err, businessError)
+		return
+	}
+	resResp.Result = CRUDResult{Num: event.Num, Success: true}
+	resWrite(w, resResp)
+}
 
+func eventsHandler(w http.ResponseWriter, r *http.Request, get GetEvents) {
+	var resResp ResultResponse
+	w.Header().Set("Content-Type", "application/x-www-form-urlencoded")
+	event, err := parseGet(r)
+	if err != nil {
+		errWrite(w, err, inputError)
+		return
+	}
+	events := get(event.UserID, event.Date)
+	resResp.Result = GetResult{events}
+	resWrite(w, resResp)
 }
 
 func dayEventsHandler(w http.ResponseWriter, r *http.Request) {
-
+	eventsHandler(w, r, storage.getEventsByDay)
 }
 
 func weekEventsHandler(w http.ResponseWriter, r *http.Request) {
-
+	eventsHandler(w, r, storage.getEventsByWeek)
 }
 
 func monthEventsHandler(w http.ResponseWriter, r *http.Request) {
-
+	eventsHandler(w, r, storage.getEventsByMonth)
 }
