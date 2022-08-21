@@ -5,6 +5,7 @@ import (
 	"github.com/spf13/viper"
 	"log"
 	"net/http"
+	"os"
 )
 
 /*
@@ -29,9 +30,21 @@ import (
 	4. Код должен проходить проверки go vet и golint.
 */
 var storage Repository
+var logger *log.Logger
 
 func init() {
 	storage = NewStorage()
+	err := ReadConfig()
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+	logger = log.Default()
+	logfile := viper.GetString("log")
+	file, err := os.Create(logfile)
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+	logger.SetOutput(file)
 }
 
 func ReadConfig() error {
@@ -57,11 +70,7 @@ func main() {
 
 	// set middleware
 	siteHandler := logMiddleware(mux)
-	err := ReadConfig()
-	if err != nil {
-		log.Fatal(err.Error())
-	}
-	
+
 	address := viper.GetString("port")
 	fmt.Println("launching server at port", address)
 	http.ListenAndServe(address, siteHandler)
