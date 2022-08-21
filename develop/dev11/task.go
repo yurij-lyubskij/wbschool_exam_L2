@@ -1,10 +1,7 @@
 package main
 
 import (
-	"encoding/json"
-	"fmt"
 	"net/http"
-	"time"
 )
 
 /*
@@ -29,6 +26,8 @@ import (
 	4. Код должен проходить проверки go vet и golint.
 */
 
+var storage = NewStorage()
+
 func main() {
 
 	http.HandleFunc("/create_event", createHandler)
@@ -38,55 +37,33 @@ func main() {
 	http.HandleFunc("/events_for_week", weekEventsHandler)
 	http.HandleFunc("/events_for_month", monthEventsHandler)
 
-	fmt.Println("starting server at :8080")
-	t, err := time.Parse(dateForm, "2019-09-10")
-	//d := time.Date(2000, 2, 1, 12, 30, 0, 0, time.UTC)
-	year, month, day := t.Date()
-	fmt.Println(year, month, day)
-	if err != nil {
-		fmt.Println(err)
-	}
-	event := Event{
-		UserID:      "123",
-		Date:        t,
-		Num:         100,
-		Description: "dadfadsf",
-	}
-	fmt.Println(event)
-	bytes, err := json.Marshal(&event)
-	fmt.Println(string(bytes))
-	if err != nil {
-		fmt.Println(err)
-	}
-	var newevent Event
-	err = json.Unmarshal(bytes, &newevent)
-	if err != nil {
-		fmt.Println(err)
-	}
-	fmt.Println(newevent)
-	fmt.Println(time.Now())
-	//http.ListenAndServe(":8080", nil)
-	storage := NewStorage()
-	_, err = storage.createEvent(event)
-	if err != nil {
-		fmt.Println(err)
-	}
-	event.Description = "new1"
-	_, err = storage.createEvent(event)
-	if err != nil {
-		fmt.Println(err)
-	}
-	event.Description = "new2"
-	_, err = storage.createEvent(event)
-	if err != nil {
-		fmt.Println(err)
-	}
-	event.Description = "new3"
-	_, err = storage.createEvent(event)
-	if err != nil {
-		fmt.Println(err)
-	}
-	fmt.Println(*storage)
-	events := storage.getEventsByWeek(event.UserID, event.Date)
-	fmt.Println(events)
+	//fmt.Println("starting server at :8080")
+	//t, err := time.Parse(dateForm, "2019-09-10")
+	////d := time.Date(2000, 2, 1, 12, 30, 0, 0, time.UTC)
+	//year, month, day := t.Date()
+	//fmt.Println(year, month, day)
+	//if err != nil {
+	//	fmt.Println(err)
+	//}
+	//event := Event{
+	//	UserID:      "123",
+	//	Date:        t,
+	//	Num:         100,
+	//	Description: "dadfadsf",
+	//}
+	//fmt.Println(event)
+	//bytes, err := json.Marshal(&event)
+	//fmt.Println(string(bytes))
+	//if err != nil {
+	//	fmt.Println(err)
+	//}
+	//var newevent Event
+	//err = json.Unmarshal(bytes, &newevent)
+	//if err != nil {
+	//	fmt.Println(err)
+	//}
+	//fmt.Println(newevent)
+	//fmt.Println(time.Now())
+	http.ListenAndServe(":8080", nil)
+
 }

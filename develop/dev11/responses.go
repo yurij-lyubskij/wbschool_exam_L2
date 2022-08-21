@@ -8,7 +8,6 @@ import (
 )
 
 func dateBuilder(str *strings.Builder, year, month, day int) {
-
 	str.WriteString(strconv.Itoa(year))
 	str.WriteRune('-')
 	if month < 10 {
@@ -83,7 +82,7 @@ func (m *Event) UnmarshalJSON(json []byte) error {
 	return nil
 }
 
-func (e *ErrorResponse) MarshalJSON() ([]byte, error) {
+func (e ErrorResponse) MarshalJSON() ([]byte, error) {
 	str := strings.Builder{}
 	str.WriteString(`{"error":"`)
 	str.WriteString(e.ErrorMsg)

@@ -5,30 +5,44 @@ import "net/http"
 const inputError = 400
 const serverError = 500
 
-func createHandler(w http.ResponseWriter, r *http.Request) {
-	event, err := parsePost(r, false, true)
-	var errResp ErrorResponse
-	var resResp ResultResponse
+func errWrite(w http.ResponseWriter, err error) {
 	var bytes []byte
-	w.Header().Set("Content-Type", "application/x-www-form-urlencoded")
+	var errResp ErrorResponse
+	errResp.ErrorMsg = err.Error()
+	bytes, err = errResp.MarshalJSON()
 	if err != nil {
-		errResp.ErrorMsg = err.Error()
-		bytes, err = errResp.MarshalJSON()
-		if err != nil {
-			w.WriteHeader(serverError)
-			return
-		}
-		w.WriteHeader(inputError)
-		w.Write(bytes)
+		w.WriteHeader(serverError)
 		return
 	}
-	resResp.Result = CRUDResult{Num: event.Num, Success: true}
-	bytes, err = resResp.MarshalJSON()
+	w.WriteHeader(inputError)
+	w.Write(bytes)
+}
+
+func resWrite(w http.ResponseWriter, resResp ResultResponse) {
+	var bytes []byte
+	bytes, err := resResp.MarshalJSON()
 	if err != nil {
 		w.WriteHeader(serverError)
 		return
 	}
 	w.Write(bytes)
+}
+
+func createHandler(w http.ResponseWriter, r *http.Request) {
+	event, err := parsePost(r, false, true)
+	var resResp ResultResponse
+	w.Header().Set("Content-Type", "application/x-www-form-urlencoded")
+	if err != nil {
+		errWrite(w, err)
+		return
+	}
+	num, err := storage.createEvent(event)
+	if err != nil {
+		errWrite(w, err)
+		return
+	}
+	resResp.Result = CRUDResult{Num: num, Success: true}
+	resWrite(w, resResp)
 }
 
 func updateHandler(w http.ResponseWriter, r *http.Request) {
