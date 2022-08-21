@@ -30,7 +30,7 @@ type Storage struct {
 	Events EventsMap
 }
 
-func NewStorage() *Storage {
+func NewStorage() Repository {
 	return &Storage{
 		Events: make(EventsMap),
 	}

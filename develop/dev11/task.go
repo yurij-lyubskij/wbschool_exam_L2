@@ -1,6 +1,8 @@
 package main
 
 import (
+	"github.com/spf13/viper"
+	"log"
 	"net/http"
 )
 
@@ -25,11 +27,25 @@ import (
 	3. В случае ошибки бизнес-логики сервер должен возвращать HTTP 503. В случае ошибки входных данных (невалидный int например) сервер должен возвращать HTTP 400. В случае остальных ошибок сервер должен возвращать HTTP 500. Web-сервер должен запускаться на порту указанном в конфиге и выводить в лог каждый обработанный запрос.
 	4. Код должен проходить проверки go vet и golint.
 */
+var storage Repository
 
-var storage = NewStorage()
+func init() {
+	storage = NewStorage()
+}
+
+func ReadConfig() error {
+	viper.SetConfigName("config.json")
+	viper.AddConfigPath("./")
+	viper.SetConfigType("json")
+
+	err := viper.ReadInConfig()
+	if err != nil {
+		return err
+	}
+	return nil
+}
 
 func main() {
-
 	http.HandleFunc("/create_event", createHandler)
 	http.HandleFunc("/update_event", updateHandler)
 	http.HandleFunc("/delete_event", deleteHandler)
@@ -64,6 +80,11 @@ func main() {
 	//}
 	//fmt.Println(newevent)
 	//fmt.Println(time.Now())
-	http.ListenAndServe(":8080", nil)
+	err := ReadConfig()
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+	address := viper.GetString("port")
+	http.ListenAndServe(address, nil)
 
 }

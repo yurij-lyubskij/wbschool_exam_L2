@@ -37,3 +37,14 @@ type CRUDResult struct {
 type GetResult struct {
 	Events []Event `json:"events"`
 }
+
+//Repository - интерфейс для
+//работы с событиями
+type Repository interface {
+	createEvent(event Event) (num int, err error)
+	updateEvent(event Event) error
+	deleteEvent(event Event) error
+	getEventsByDay(id string, date time.Time) []Event
+	getEventsByMonth(id string, date time.Time) []Event
+	getEventsByWeek(id string, date time.Time) []Event
+}
