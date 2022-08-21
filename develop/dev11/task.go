@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"github.com/spf13/viper"
 	"log"
 	"net/http"
@@ -85,6 +86,7 @@ func main() {
 		log.Fatal(err.Error())
 	}
 	address := viper.GetString("port")
+	fmt.Println("launching server at port", address)
 	http.ListenAndServe(address, nil)
 
 }
