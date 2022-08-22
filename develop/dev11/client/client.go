@@ -11,6 +11,7 @@ import (
 
 const ctype = `application/x-www-form-urlencoded`
 
+//запрос POST с передаваемым эндпоинтом и urlencoded телом
 func postReq(endpoint string, data url.Values) {
 	encodedData := data.Encode()
 	fmt.Println(encodedData)
@@ -35,6 +36,7 @@ func postReq(endpoint string, data url.Values) {
 	fmt.Printf("resp %#v\n", string(respBody))
 }
 
+//запрос POST с передаваемым эндпоинтом и queryparams
 func getReq(endpoint string, data url.Values) {
 	encodedData := data.Encode()
 	fmt.Println(encodedData)
@@ -58,6 +60,7 @@ func getReq(endpoint string, data url.Values) {
 	fmt.Printf("resp %#v\n", string(respBody))
 }
 
+//тестовый запрос на создание события
 func testCreate() {
 	data := url.Values{}
 	data.Set("user_id", "John")
@@ -67,6 +70,7 @@ func testCreate() {
 	postReq(create, data)
 }
 
+//тестовый запрос на изменение события
 func testUpdate() {
 	data := url.Values{}
 	data.Set("user_id", "John")
@@ -77,6 +81,7 @@ func testUpdate() {
 	postReq(update, data)
 }
 
+//тестовый запрос на удаление события
 func testDelete() {
 	data := url.Values{}
 	data.Set("user_id", "John")
@@ -86,6 +91,7 @@ func testDelete() {
 	postReq(rdelete, data)
 }
 
+//запрос на получение событий
 func testGet(endpoint string) {
 	data := url.Values{}
 	data.Set("user_id", "John")
@@ -95,16 +101,19 @@ func testGet(endpoint string) {
 	getReq(endpoint, data)
 }
 
+//тестовый запрос на получение событий за день
 func testGetDay() {
 	endpoint := "/events_for_day?"
 	testGet(endpoint)
 }
 
+//тестовый запрос на получение событий за неделю
 func testGetWeek() {
 	endpoint := "/events_for_week?"
 	testGet(endpoint)
 }
 
+//тестовый запрос на получение событий за месяц
 func testGetMonth() {
 	endpoint := "/events_for_month?"
 	testGet(endpoint)
