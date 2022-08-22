@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"net/http"
 	"time"
 )
@@ -32,6 +33,12 @@ func resWrite(w http.ResponseWriter, resResp ResultResponse) {
 		return
 	}
 	w.Write(bytes)
+}
+
+func defaultHandler(w http.ResponseWriter, r *http.Request) {
+	err := errors.New("page not found")
+	errWrite(w, err, inputError)
+	return
 }
 
 func createHandler(w http.ResponseWriter, r *http.Request) {

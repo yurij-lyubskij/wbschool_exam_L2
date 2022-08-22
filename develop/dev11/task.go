@@ -67,7 +67,7 @@ func main() {
 	mux.HandleFunc("/events_for_day", dayEventsHandler)
 	mux.HandleFunc("/events_for_week", weekEventsHandler)
 	mux.HandleFunc("/events_for_month", monthEventsHandler)
-
+	mux.HandleFunc("/", defaultHandler)
 	// set middleware
 	siteHandler := logMiddleware(mux)
 
