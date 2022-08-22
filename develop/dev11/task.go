@@ -32,6 +32,9 @@ import (
 var storage Repository
 var logger *log.Logger
 
+//подготавливаем конфиг к чтению,
+//репозиторий к сохранению данных
+//и готовимся записывать логи в файл
 func init() {
 	storage = NewStorage()
 	err := ReadConfig()
@@ -47,6 +50,8 @@ func init() {
 	logger.SetOutput(file)
 }
 
+//ReadConfig - Функция для подготовки
+//чтения из конфига
 func ReadConfig() error {
 	viper.SetConfigName("config.json")
 	viper.AddConfigPath("./")
@@ -60,6 +65,8 @@ func ReadConfig() error {
 }
 
 func main() {
+	//роутинг с помощью http.NewServeMux()
+	//передаем url pattern и хэндлер
 	mux := http.NewServeMux()
 	mux.HandleFunc("/create_event", createHandler)
 	mux.HandleFunc("/update_event", updateHandler)
@@ -68,11 +75,12 @@ func main() {
 	mux.HandleFunc("/events_for_week", weekEventsHandler)
 	mux.HandleFunc("/events_for_month", monthEventsHandler)
 	mux.HandleFunc("/", defaultHandler)
-	// set middleware
+	//используем Middleware
 	siteHandler := logMiddleware(mux)
-
+	//считываем порт из конфига
 	address := viper.GetString("port")
 	fmt.Println("launching server at port", address)
+	//запускаем сервер
 	http.ListenAndServe(address, siteHandler)
 
 }

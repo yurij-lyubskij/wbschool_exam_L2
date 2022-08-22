@@ -7,6 +7,8 @@ import (
 	"time"
 )
 
+//маршалим дату по известным году, месяцу и дню
+//в формате "2006-01-02"
 func dateBuilder(str *strings.Builder, year, month, day int) {
 	str.WriteString(strconv.Itoa(year))
 	str.WriteRune('-')
@@ -21,6 +23,7 @@ func dateBuilder(str *strings.Builder, year, month, day int) {
 	str.WriteString(strconv.Itoa(day))
 }
 
+//MarshalJSON - реализация интерфейса для события
 func (m *Event) MarshalJSON() ([]byte, error) {
 	//{"user_id":"123","date":"2019-09-10", "event_num":"1", "description":"dadfadsf"}
 	str := strings.Builder{}
@@ -37,6 +40,7 @@ func (m *Event) MarshalJSON() ([]byte, error) {
 	return []byte(str.String()), nil
 }
 
+//UnmarshalJSON - реализация интерфейса для события
 func (m *Event) UnmarshalJSON(json []byte) error {
 	//{"user_id":"123","date":"2019-09-10","event_num":"1","description":"dadfadsf"}
 	strJSON := string(json)
@@ -82,6 +86,7 @@ func (m *Event) UnmarshalJSON(json []byte) error {
 	return nil
 }
 
+//MarshalJSON - реализация интерфейса для ответа-ошибки
 func (e ErrorResponse) MarshalJSON() ([]byte, error) {
 	str := strings.Builder{}
 	str.WriteString(`{"error":"`)
@@ -90,6 +95,7 @@ func (e ErrorResponse) MarshalJSON() ([]byte, error) {
 	return []byte(str.String()), nil
 }
 
+//MarshalJSON - реализация интерфейса для ответа-результата
 func (r ResultResponse) MarshalJSON() ([]byte, error) {
 	var result strings.Builder
 	result.WriteString(`{"result":"`)
@@ -102,6 +108,8 @@ func (r ResultResponse) MarshalJSON() ([]byte, error) {
 	return []byte(result.String()), nil
 }
 
+//MarshalJSON - реализация интерфейса для структуры,
+//содержащей результат гет-запроса
 func (g GetResult) MarshalJSON() ([]byte, error) {
 	var result strings.Builder
 	result.WriteString(`{"events":[`)
@@ -119,6 +127,8 @@ func (g GetResult) MarshalJSON() ([]byte, error) {
 	return []byte(result.String()), nil
 }
 
+//MarshalJSON - реализация интерфейса для структуры,
+//содержащей результат пост-запроса
 func (c CRUDResult) MarshalJSON() ([]byte, error) {
 	var result strings.Builder
 	result.WriteString(`{"event_num":`)

@@ -22,18 +22,23 @@ type ErrorResponse struct {
 	ErrorMsg string `json:"error"`
 }
 
-//ResultResponse
+//ResultResponse - формат ответа на запрос,
+//содержащего результат. Общий для
+//GET и POST, но у них разный
+//Result. Сериализуется в JSON
 type ResultResponse struct {
 	Result json.Marshaler `json:"result"`
 }
 
-//CRUDResult - create, update response
+//CRUDResult - формат результата ответа на
+//POST запрос. Сериализуется в JSON
 type CRUDResult struct {
 	Num     int  `json:"event_num"`
 	Success bool `json:"success"`
 }
 
-//GetResult - create, update response
+//GetResult - формат результата ответа на
+//GET запрос. Сериализуется в JSON
 type GetResult struct {
 	Events []Event `json:"events"`
 }
