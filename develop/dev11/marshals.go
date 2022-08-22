@@ -105,13 +105,15 @@ func (r ResultResponse) MarshalJSON() ([]byte, error) {
 func (g GetResult) MarshalJSON() ([]byte, error) {
 	var result strings.Builder
 	result.WriteString(`{"events":[`)
-	for _, event := range g.Events {
+	for i, event := range g.Events {
 		body, err := event.MarshalJSON()
 		if err != nil {
 			return []byte{}, err
 		}
 		result.Write(body)
-		result.WriteRune(',')
+		if i != len(g.Events)-1 {
+			result.WriteRune(',')
+		}
 	}
 	result.WriteString(`]}`)
 	return []byte(result.String()), nil
