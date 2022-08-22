@@ -1,10 +1,13 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"golang.org/x/net/html"
+	"io"
 	"log"
-	"strings"
+	"net/http"
+	"os"
 )
 
 /*
@@ -16,14 +19,21 @@ import (
 */
 
 func main() {
-	//resp, err := http.Get("http://example.com/")
-	//if err != nil {
-	//	// handle error
-	//}
-	//defer resp.Body.Close()
-	//body, err := io.ReadAll(resp.Body)
-	s := `<p>Links:</p><ul><li><a href="foo">Foo</a><li><a href="/bar/baz">BarBaz</a></ul>`
-	doc, err := html.Parse(strings.NewReader(s))
+	resp, err := http.Get("http://yandex.ru")
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+	defer resp.Body.Close()
+	body, err := io.ReadAll(resp.Body)
+	name := "index.html"
+	file, err := os.Create(name)
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+	defer file.Close()
+	file.Write(body)
+	reader := bytes.NewReader(body)
+	doc, err := html.Parse(reader)
 	if err != nil {
 		log.Fatal(err)
 	}
