@@ -3,10 +3,12 @@ package main
 import (
 	"bytes"
 	"fmt"
+	"github.com/google/uuid"
 	"golang.org/x/net/html"
 	"io"
 	"log"
 	"net/http"
+	"net/url"
 	"os"
 	"strings"
 )
@@ -33,36 +35,65 @@ func findLinks(n *html.Node, s *strings.Builder) {
 	}
 }
 
-func recursiveDownload(prev []byte, links []string, level int) {
+var maxLevel = 2
+var dir string
 
+func init() {
+	dir, _ = os.Getwd()
 }
 
-func main() {
-	resp, err := http.Get("https://yandex.ru")
+func recursiveDownload(link string, level int, name string) {
+	baseLink, err := url.Parse(link)
 	if err != nil {
-		log.Fatal(err.Error())
+		log.Fatal("parse ", link, err.Error())
+	}
+	resp, err := http.Get(link)
+	if err != nil {
+		log.Fatal("get ", link, err.Error())
 	}
 	defer resp.Body.Close()
 	body, err := io.ReadAll(resp.Body)
-	name := "index.html"
+	fmt.Println(name)
 	file, err := os.Create(name)
 	if err != nil {
-		log.Fatal(err.Error())
+		log.Fatal("create, name = ", name, "err= ", err.Error(), " link =", link)
 	}
 	defer file.Close()
-	file.Write(body)
+
+	if level == maxLevel {
+		file.Write(body)
+		return
+	}
+
 	reader := bytes.NewReader(body)
 	doc, err := html.Parse(reader)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal("htmlparse", err)
 	}
-	var f func(*html.Node, *strings.Builder)
 	s := strings.Builder{}
-	f = findLinks
-	f(doc, &s)
+	findLinks(doc, &s)
 	links := strings.Split(s.String(), "\n")
-	for i := range links {
-		fmt.Println(links[i])
+	for _, oneLink := range links {
+		if oneLink == "/" {
+			continue
+		}
+		parsedLink, err := url.Parse(oneLink)
+		if err != nil {
+			log.Fatal("parseOne ", oneLink, err.Error())
+		}
+		parts := strings.Split(oneLink, "/")
+		nextName := uuid.NewString() + parts[len(parts)-1]
+		nextURL := baseLink.ResolveReference(parsedLink)
+		replaceLink := "file://" + dir + nextName
+		fmt.Println(nextURL.String())
+		body = bytes.ReplaceAll(body, []byte(oneLink), []byte(replaceLink))
+		recursiveDownload(nextURL.String(), level+1, nextName)
 	}
+	file.Write(body)
+}
 
+func main() {
+	link := "https://yandex.ru/"
+	fname := "index.html"
+	recursiveDownload(link, 1, fname)
 }
