@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"flag"
 	"fmt"
 	"github.com/google/uuid"
 	"golang.org/x/net/html"
@@ -36,7 +37,19 @@ func findLinks(n *html.Node, s *strings.Builder) {
 	}
 }
 
-var maxLevel = 2
+var usageStr = `
+Usage: wget [options] [URL with scheme]
+file - stdin по умолчанию
+Options:
+-r - "recursive" - скачивать рекурсивно
+`
+
+func usage() {
+	fmt.Printf("%s\n", usageStr)
+	os.Exit(0)
+}
+
+var maxLevel int
 var dir string
 
 func init() {
@@ -101,7 +114,17 @@ func recursiveDownload(link string, level int, name string) {
 }
 
 func main() {
-	link := "https://vc.ru/"
+	//настройки утилиты - возможные флаги
+	flag.IntVar(&maxLevel, "r", 1, "загружать рекурсивно")
+	flag.Usage = usage
+	//парсим флаги
+	flag.Parse()
+	args := flag.Args()
+	if len(args) != 1 {
+		usage()
+		return
+	}
+	link := args[0]
 	fname := "index.html"
 	recursiveDownload(link, 1, fname)
 }
