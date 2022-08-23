@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"path/filepath"
 	"strings"
 )
 
@@ -45,18 +46,21 @@ func init() {
 func recursiveDownload(link string, level int, name string) {
 	baseLink, err := url.Parse(link)
 	if err != nil {
-		log.Fatal("parse ", link, err.Error())
+		log.Println("parse ", link, err.Error())
+		return
 	}
 	resp, err := http.Get(link)
 	if err != nil {
-		log.Fatal("get ", link, err.Error())
+		log.Println("get ", link, err.Error())
+		return
 	}
 	defer resp.Body.Close()
 	body, err := io.ReadAll(resp.Body)
 	fmt.Println(name)
 	file, err := os.Create(name)
 	if err != nil {
-		log.Fatal("create, name = ", name, "err= ", err.Error(), " link =", link)
+		log.Println("create, name = ", name, "err= ", err.Error(), " link =", link)
+		return
 	}
 	defer file.Close()
 
@@ -64,11 +68,11 @@ func recursiveDownload(link string, level int, name string) {
 		file.Write(body)
 		return
 	}
-
 	reader := bytes.NewReader(body)
 	doc, err := html.Parse(reader)
 	if err != nil {
-		log.Fatal("htmlparse", err)
+		log.Println("htmlparse", err)
+		return
 	}
 	s := strings.Builder{}
 	findLinks(doc, &s)
@@ -79,21 +83,25 @@ func recursiveDownload(link string, level int, name string) {
 		}
 		parsedLink, err := url.Parse(oneLink)
 		if err != nil {
-			log.Fatal("parseOne ", oneLink, err.Error())
+			log.Println("parseOne ", oneLink, err.Error())
+			return
 		}
-		parts := strings.Split(oneLink, "/")
-		nextName := uuid.NewString() + parts[len(parts)-1]
+		extension := filepath.Ext(parsedLink.Path)
+		if extension == "" {
+			extension = ".html"
+		}
+		nextName := uuid.NewString() + extension
 		nextURL := baseLink.ResolveReference(parsedLink)
-		replaceLink := "file://" + dir + nextName
+		replaceLink := "file://" + dir + "/" + nextName
 		fmt.Println(nextURL.String())
-		body = bytes.ReplaceAll(body, []byte(oneLink), []byte(replaceLink))
+		body = bytes.Replace(body, []byte(oneLink), []byte(replaceLink), 1)
 		recursiveDownload(nextURL.String(), level+1, nextName)
 	}
 	file.Write(body)
 }
 
 func main() {
-	link := "https://yandex.ru/"
+	link := "https://vc.ru/"
 	fname := "index.html"
 	recursiveDownload(link, 1, fname)
 }
