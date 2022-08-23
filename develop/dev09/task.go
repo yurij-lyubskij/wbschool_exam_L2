@@ -8,6 +8,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strings"
 )
 
 /*
@@ -18,8 +19,26 @@ import (
 Программа должна проходить все тесты. Код должен проходить проверки go vet и golint.
 */
 
+func findLinks(n *html.Node, s *strings.Builder) {
+	if n.Type == html.ElementNode {
+		for _, a := range n.Attr {
+			if a.Key == "href" {
+				fmt.Fprintln(s, a.Val)
+				break
+			}
+		}
+	}
+	for c := n.FirstChild; c != nil; c = c.NextSibling {
+		findLinks(c, s)
+	}
+}
+
+func recursiveDownload(prev []byte, links []string, level int) {
+
+}
+
 func main() {
-	resp, err := http.Get("http://yandex.ru")
+	resp, err := http.Get("https://yandex.ru")
 	if err != nil {
 		log.Fatal(err.Error())
 	}
@@ -37,19 +56,13 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	var f func(*html.Node)
-	f = func(n *html.Node) {
-		if n.Type == html.ElementNode {
-			for _, a := range n.Attr {
-				if a.Key == "href" {
-					fmt.Println(a.Val)
-					break
-				}
-			}
-		}
-		for c := n.FirstChild; c != nil; c = c.NextSibling {
-			f(c)
-		}
+	var f func(*html.Node, *strings.Builder)
+	s := strings.Builder{}
+	f = findLinks
+	f(doc, &s)
+	links := strings.Split(s.String(), "\n")
+	for i := range links {
+		fmt.Println(links[i])
 	}
-	f(doc)
+
 }
