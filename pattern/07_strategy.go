@@ -36,7 +36,7 @@ func (s *StrategyB) execute() {
 }
 
 //Context  - содержит
-//интерфейс для работы
+//методы для работы
 //со стратегией
 type Context struct {
 	strategy Strategy

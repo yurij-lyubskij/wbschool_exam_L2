@@ -19,4 +19,6 @@ func main() {
 	p.TestFactoryMeth()
 	fmt.Println()
 	p.TestStrategy()
+	fmt.Println()
+	p.TestState()
 }
