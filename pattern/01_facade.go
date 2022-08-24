@@ -1,6 +1,7 @@
 package pattern
 
 import "fmt"
+
 /*
 	Реализовать паттерн «фасад».
 Объяснить применимость паттерна, его плюсы и минусы,а также реальные примеры использования данного примера на практике.
@@ -48,34 +49,33 @@ func (c *Memory) Load(position int64, data *uint8) {
 
 //адрес, сектор, размер сектора загрузки
 //т.к. пример абстрактный, зануляем
-const kBootAddress = 0
-const kBootSector = 0
-const kSectorSize = 0
+const bootAddress = 0
+const bootSector = 0
+const sectorSize = 0
 
-//простой интерфейс
-type Facade interface{
+//Facade - простой интерфейс
+type Facade interface {
 	Start()
 }
 
-//фасад компьютера
+//ComputerFacade - фасад компьютера
 type ComputerFacade struct {
-	cpu        CPU
-	memory     Memory
+	cpu       CPU
+	memory    Memory
 	hardDrive HardDrive
 }
 
-
-//Start() - запуск компьютера. Под капотом
+//Start - запуск компьютера. Под капотом
 //выполняет набор действий
 func (c ComputerFacade) Start() {
 	c.cpu.Freeze()
-	c.memory.Load(kBootAddress, c.hardDrive.Read(kBootSector, kSectorSize))
-	c.cpu.Jump(kBootAddress)
+	c.memory.Load(bootAddress, c.hardDrive.Read(bootSector, sectorSize))
+	c.cpu.Jump(bootAddress)
 	c.cpu.Execute()
 	return
 }
 
-//проверяем программу
+//TestFacade - демонстрация шаблона
 func TestFacade() {
 	var computer Facade = &ComputerFacade{}
 	computer.Start()
