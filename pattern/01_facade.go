@@ -67,7 +67,7 @@ type ComputerFacade struct {
 
 //Start() - запуск компьютера. Под капотом
 //выполняет набор действий
-func (c* ComputerFacade) Start() {
+func (c ComputerFacade) Start() {
 	c.cpu.Freeze()
 	c.memory.Load(kBootAddress, c.hardDrive.Read(kBootSector, kSectorSize))
 	c.cpu.Jump(kBootAddress)
