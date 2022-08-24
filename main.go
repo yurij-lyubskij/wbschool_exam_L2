@@ -11,4 +11,6 @@ func main() {
 	p.TestBuilder()
 	fmt.Println()
 	p.TestVisitor()
+	fmt.Println()
+	p.TestCommand()
 }
