@@ -13,4 +13,6 @@ func main() {
 	p.TestVisitor()
 	fmt.Println()
 	p.TestCommand()
+	fmt.Println()
+	p.TestChain()
 }
