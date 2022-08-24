@@ -17,4 +17,6 @@ func main() {
 	p.TestChain()
 	fmt.Println()
 	p.TestFactoryMeth()
+	fmt.Println()
+	p.TestStrategy()
 }
