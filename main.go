@@ -15,4 +15,6 @@ func main() {
 	p.TestCommand()
 	fmt.Println()
 	p.TestChain()
+	fmt.Println()
+	p.TestFactoryMeth()
 }
